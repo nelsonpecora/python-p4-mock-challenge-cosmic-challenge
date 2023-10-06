@@ -35,6 +35,10 @@ class Planet(db.Model, SerializerMixin):
 class Scientist(db.Model, SerializerMixin):
     __tablename__ = 'scientists'
 
+    def __init__(self, name, field_of_study):
+        self.name = name
+        self.field_of_study = field_of_study
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     field_of_study = db.Column(db.String)

@@ -38,7 +38,7 @@ class ScientistList(Resource):
                 json.get("name"), json.get("field_of_study"))
             db.session.add(new_scientist)
             db.session.commit()
-            return new_scientist.to_dict()
+            return new_scientist.to_dict(), 201
         except ValueError:
             return {"errors": ["validation errors"]}, 400
 
@@ -54,6 +54,25 @@ class ScientistItem(Resource):
             return scientist.to_dict()
         else:
             return {"error": "Scientist not found"}, 404
+
+# patch scientist with id, name, field_of_study
+    def patch(self, id):
+        json = request.get_json()
+        scientist = Scientist.query.get(id)
+        if not scientist:
+            return {"error": "Scientist not found"}, 404
+
+        try:
+            if 'name' in request.json:
+                scientist.name = request.json['name']
+
+            if 'field_of_study' in request.json:
+                scientist.field_of_study = request.json['field_of_study']
+
+            db.session.commit()
+            return scientist.to_dict(rules=("-missions",)), 202
+        except ValueError:
+            return {"errors": ["validation errors"]}, 400
 
 
 api.add_resource(ScientistItem, '/scientists/<int:id>')

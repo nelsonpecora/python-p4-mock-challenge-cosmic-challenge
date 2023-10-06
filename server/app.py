@@ -24,6 +24,7 @@ db.init_app(app)
 api = Api(app)
 
 
+# gets all scientists from API
 class ScientistList(Resource):
     def get(self):
         scientists = Scientist.query.all()
@@ -32,14 +33,22 @@ class ScientistList(Resource):
 
 api.add_resource(ScientistList, '/scientists')
 
+# gets individual scientist by ID with list of missions
+
 
 class ScientistItem(Resource):
     def get(self, id):
-        return Scientist.query.get(id).to_dict()
+        scientist = Scientist.query.get(id)
+        if scientist:
+            return scientist.to_dict()
+        else:
+            return {"error": "Scientist not found"}, 404
 
 
 api.add_resource(ScientistItem, '/scientists/<int:id>')
 
+
+# POST scientist
 
 # @app.route('/')
 # def home():

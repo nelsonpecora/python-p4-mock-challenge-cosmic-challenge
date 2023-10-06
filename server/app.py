@@ -24,13 +24,41 @@ db.init_app(app)
 api = Api(app)
 
 
+# gets all planets from API
+class PlanetList(Resource):
+    def get(self):
+        planets = Planet.query.all()
+        return [planet.to_dict(rules=("-missions",)) for planet in planets]
+
+
+api.add_resource(PlanetList, '/planets')
+
+# make class for missions, then post mission with response else error
+
+
+class MissionList(Resource):
+    def post(self):
+        json = request.get_json()
+        try:
+            new_mission = Mission(
+                json.get("name"), json.get("scientist_id"), json.get("planet_id"))
+            db.session.add(new_mission)
+            db.session.commit()
+            return new_mission.to_dict(), 201
+        except ValueError:
+            return {"errors": ["validation errors"]}, 400
+
+
+api.add_resource(MissionList, '/missions')
+
+
 # gets all scientists from API
 class ScientistList(Resource):
     def get(self):
         scientists = Scientist.query.all()
         return [scientist.to_dict(rules=("-missions",)) for scientist in scientists]
 
-# POST to create new scientist, accepts name/field, returns error 403
+    # POST to create new scientist, accepts name/field, returns error 403
     def post(self):
         json = request.get_json()
         try:
@@ -55,7 +83,7 @@ class ScientistItem(Resource):
         else:
             return {"error": "Scientist not found"}, 404
 
-# patch scientist with id, name, field_of_study
+    # patch scientist with id, name, field_of_study
     def patch(self, id):
         json = request.get_json()
         scientist = Scientist.query.get(id)
@@ -63,16 +91,27 @@ class ScientistItem(Resource):
             return {"error": "Scientist not found"}, 404
 
         try:
-            if 'name' in request.json:
-                scientist.name = request.json['name']
+            if 'name' in json:
+                scientist.name = json['name']
 
-            if 'field_of_study' in request.json:
-                scientist.field_of_study = request.json['field_of_study']
+            if 'field_of_study' in json:
+                scientist.field_of_study = json['field_of_study']
 
             db.session.commit()
             return scientist.to_dict(rules=("-missions",)), 202
         except ValueError:
             return {"errors": ["validation errors"]}, 400
+
+    # delete scientist with id, return empty response body and http code
+    # if no no scientist return error scientist not found
+
+    def delete(self, id):
+        scientist = Scientist.query.get(id)
+        if not scientist:
+            return {"error": "Scientist not found"}, 404
+        db.session.delete(scientist)
+        db.session.commit()
+        return "", 204
 
 
 api.add_resource(ScientistItem, '/scientists/<int:id>')

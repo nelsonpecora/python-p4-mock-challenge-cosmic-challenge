@@ -20,13 +20,19 @@ db = SQLAlchemy(metadata=metadata)
 class Planet(db.Model, SerializerMixin):
     __tablename__ = 'planets'
 
+    def __init__(self, name, distance_from_earth, nearest_star):
+        self.name = name
+        self.distance_from_earth = distance_from_earth
+        self.nearest_star = nearest_star
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     distance_from_earth = db.Column(db.Integer)
     nearest_star = db.Column(db.String)
 
     # Add relationship
-    missions = db.relationship("Mission", backref="planet", lazy=True)
+    missions = db.relationship(
+        "Mission", backref="planet", lazy=True, cascade="all, delete-orphan")
 
     # Add serialization rules
     serialize_rules = ("-missions.planet", )
@@ -44,7 +50,8 @@ class Scientist(db.Model, SerializerMixin):
     field_of_study = db.Column(db.String)
 
     # Add relationship
-    missions = db.relationship("Mission", backref="scientist", lazy=True)
+    missions = db.relationship(
+        "Mission", backref="scientist", lazy=True, cascade="all, delete-orphan")
 
     # Add serialization rules
     serialize_rules = ("-missions.scientist", )
@@ -65,6 +72,11 @@ class Scientist(db.Model, SerializerMixin):
 
 class Mission(db.Model, SerializerMixin):
     __tablename__ = 'missions'
+
+    def __init__(self, name, scientist_id, planet_id):
+        self.name = name
+        self.scientist_id = scientist_id
+        self.planet_id = planet_id
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)

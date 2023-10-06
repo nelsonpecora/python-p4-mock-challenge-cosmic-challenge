@@ -45,7 +45,18 @@ class Scientist(db.Model, SerializerMixin):
     # Add serialization rules
     serialize_rules = ("-missions.scientist", )
 
-    # Add validation
+    # Add validation for name and field_of_study
+    @validates('name')
+    def validate_name(self, key, value):
+        if not value:
+            raise ValueError("Must have a name")
+        return value
+
+    @validates('field_of_study')
+    def validate_field_of_study(self, key, value):
+        if not value:
+            raise ValueError("Must have a field of study")
+        return value
 
 
 class Mission(db.Model, SerializerMixin):
@@ -64,7 +75,23 @@ class Mission(db.Model, SerializerMixin):
     # Add serialization rules
     serialize_rules = ("-planet.missions", "-scientist.missions",)
 
-    # Add validation
+    # Add validation name, scientist_id, planet_id
+    @validates('name')
+    def validate_name(self, key, value):
+        if not value:
+            raise ValueError("Must have a name")
+        return value
 
+    @validates('scientist_id')
+    def validate_scientist_id(self, key, value):
+        if not value:
+            raise ValueError("Must have a valid scientist id")
+        return value
+
+    @validates('planet_id')
+    def validate_planet_id(self, key, value):
+        if not value:
+            raise ValueError("Must have a valid planet id")
+        return value
 
 # add any models you may need.

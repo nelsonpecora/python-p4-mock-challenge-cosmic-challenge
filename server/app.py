@@ -33,6 +33,14 @@ class ScientistList(Resource):
 api.add_resource(ScientistList, '/scientists')
 
 
+class ScientistItem(Resource):
+    def get(self, id):
+        return Scientist.query.get(id).to_dict()
+
+
+api.add_resource(ScientistItem, '/scientists/<int:id>')
+
+
 # @app.route('/')
 # def home():
 #     return ''

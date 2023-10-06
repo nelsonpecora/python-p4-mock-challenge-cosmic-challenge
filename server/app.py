@@ -20,10 +20,22 @@ migrate = Migrate(app, db)
 
 db.init_app(app)
 
+# initialize the restful api
+api = Api(app)
 
-@app.route('/')
-def home():
-    return ''
+
+class ScientistList(Resource):
+    def get(self):
+        scientists = Scientist.query.all()
+        return [scientist.to_dict(rules=("-missions",)) for scientist in scientists]
+
+
+api.add_resource(ScientistList, '/scientists')
+
+
+# @app.route('/')
+# def home():
+#     return ''
 
 
 if __name__ == '__main__':
